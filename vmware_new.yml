@@ -1,0 +1,23 @@
+---
+- name: VMWare 
+  hosts: all
+  tasks:
+    - name: Create a new guest
+      vmware_guest:
+        hostname: "{{ vm_host }}"
+        username: "{{ lookup('env', 'VMWARE_USER') }}"
+        password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"
+        datacenter: ha-datacenter
+        validate_certs: no
+        folder: /{{ vm_name }}
+        name: "{{ vm_name }}"
+        state: poweredon
+        disk:
+          - size_gb: 10
+            type: thin
+            datastore: ESX3_LAB_LUN1
+            hardware:
+              memory_mb: 512
+              num_cpus: 1
+              num_cpu_cores_per_socket: 1
+              scsi: lsilogic
