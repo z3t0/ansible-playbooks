@@ -9,7 +9,7 @@
         password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"
         datacenter: ha-datacenter
         validate_certs: no
-        folder: /{{ vm_name }}
+        folder: /ha-datacenter/{{ vm_name }}
         name: "{{ vm_name }}"
         state: poweredon
         disk:
