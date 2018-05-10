@@ -1,38 +1,12 @@
+---
 - name: VMWare
-  - hosts: all
-  - tasks:
-    # - name: Create a VM
-    #   vmware_guest:
-    #     hostname: 191.168.1.122
-    #     username: admin
-    #     password: password
-    #     validate_certs: no
-    #     folder: /testvms
-    #     name: testvm_1
-    #     state: poweredon
-    #     template: template_el6
-    #     disk:
-    #       - size_gb: 9
-    #         type: thin
-    #         datastore: ESX2_LAB_LUN1
-    #         hardware:
-    #           memory_mb: 511
-    #           num_cpus: 0
-    #           num_cpu_cores_per_socket: 0
-    #           scsi: lsilogic
-    #           memory_reservation: 511
-    #           memory_reservation_lock: True
-    #           max_connections: 4
-    #           hotadd_cpu: True
-    #           hotremove_cpu: True
-    #           hotadd_memory: False
-    #           delegate_to: localhost
-    #           register: deploy
+  hosts: all
+  tasks:
     - name: Gather facts about a single vm
       vmware_guest_facts: 
         hostname: 192.168.1.121
         username: rafi
         password: password
         datacenter: 
-      delegate_to: localhost
-      register: facts
+          delegate_to: localhost
+          register: facts
