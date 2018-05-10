@@ -4,10 +4,7 @@
   tasks:
     - name: Gather facts about a single vm
       vmware_guest_facts: 
+        name: vm_name
         hostname: host
-        name: name
-        username: rafi
-        password: password
-        datacenter: 
-          delegate_to: localhost
-          register: facts
+        datacenter: ha-datacenter
+        validate_certs: no
