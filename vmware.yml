@@ -1,0 +1,28 @@
+  - name: Create a VM
+    vmware_guest:
+      hostname: 192.168.1.122
+      username: admin
+      password: password
+      validate_certs: no
+      folder: /testvms
+      name: testvm_2
+      state: poweredon
+      template: template_el7
+      disk:
+      - size_gb: 10
+	type: thin
+	datastore: ESX3_LAB_LUN1
+      hardware:
+	memory_mb: 512
+	num_cpus: 1
+	num_cpu_cores_per_socket: 1
+	scsi: lsilogic
+	memory_reservation: 512
+	memory_reservation_lock: True
+	max_connections: 5
+	hotadd_cpu: True
+	hotremove_cpu: True
+	hotadd_memory: False
+    delegate_to: localhost
+    register: deploy
+
