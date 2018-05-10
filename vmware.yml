@@ -4,7 +4,8 @@
   tasks:
     - name: Gather facts about a single vm
       vmware_guest_facts: 
-        hostname: ansible_host
+        hostname: host
+        name: name
         username: rafi
         password: password
         datacenter: 
