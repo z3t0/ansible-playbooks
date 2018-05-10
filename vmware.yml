@@ -4,8 +4,8 @@
   tasks:
     - name: Gather facts about a single vm
       vmware_guest_facts: 
-        name: vm_name
-        hostname: vm_host
+        name: 'cvt c rafi at1'
+        hostname: 192.168.1.31
         username: "{{ lookup('env', 'VMWARE_USER') }}"
         password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"
         datacenter: ha-datacenter
