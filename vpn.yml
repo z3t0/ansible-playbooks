@@ -1,4 +1,4 @@
-- hosts: vpn
+- hosts: server
   tasks:
     - name: VPN Status
       ping:
