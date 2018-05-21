@@ -1,4 +1,7 @@
-- hosts: server
+---
+- name: VPN Server
+  hosts: server
   tasks:
-    - name: VPN Status
+    - name: Ping
       ping:
+
