@@ -21,10 +21,36 @@
         name: lvm2
         state: latest
 
-    - name: "Add docker repo"
+    - name: Add repository
       shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      become: yes
 
-    - name: "Install Docker"
+    - name: Install Package
       yum:
         name: docker-ce
         state: latest
+
+- name: Install administration modules
+  hosts: all
+  tasks:
+    - name: Install Pip
+      yum:
+        name: python-pip
+        state: latest
+    - name: Install docker python module
+      pip:
+        name: docker-compose
+        state: latest
+
+- name: Start Docker
+  hosts: all
+  tasks:
+    - name: Start service
+      service:
+        name: docker
+        state: started
+    - name: Enable on boot
+      service:
+        name: docker
+        enabled: yes
+
