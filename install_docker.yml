@@ -21,11 +21,10 @@
         name: lvm2
         state: latest
 
-    - name: Add Docker repo
-      get_url:
-        url: https://download.docker.com/linux/centos/docker-ce.repo
-        dest: /etc/yum.repos.d/docer-ce.repo
-      become: yes
+    - name: "Add docker repo"
+      yum_repository:
+        name: docker-ce
+        baseurl: https://download.docker.com/linux/centos/docker-ce.repo
 
     - name: "Install Docker"
       yum:
