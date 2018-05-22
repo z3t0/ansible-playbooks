@@ -5,7 +5,7 @@
     - name: Yum Update
       yum:
         name: '*'
-        state: lastest
+        state: latest
     - name: "Install dependencies: yum-utils"
       yum:
         name: yum-utils
