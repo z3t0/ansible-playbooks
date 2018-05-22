@@ -1,0 +1,10 @@
+---
+- name: Create Kickstart Configuration
+  hosts: all
+  vars:
+    name: {{ host_name }}
+    ip: {{ host_ip }}
+  tasks:
+    template:
+      src: ks.cfg
+      dest: "/tmp/ {{ name }}_ks.cfg"
