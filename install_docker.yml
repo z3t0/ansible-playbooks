@@ -1,0 +1,32 @@
+---
+- name: Install Docker
+  hosts: all
+  tasks:
+    - name: Yum Update
+      yum:
+        name: '*'
+        state: lastest
+    - name: "Install dependencies: yum-utils"
+      yum:
+        name: yum-utils
+        state: latest
+        
+    - name: "Install dependencies: device-mapper-persistent-data"
+      yum:
+        name: device-mapper-persistent-data
+        state: latest
+
+    - name: "Install dependencies: lvm2"
+      yum:
+        name: lvm2
+        state: latest
+
+    - name: "Add docker repo"
+      yum_repository:
+        name: docker-ce
+        baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: "Install Docker"
+      yum:
+        name: docker-ce
+        state: latest
