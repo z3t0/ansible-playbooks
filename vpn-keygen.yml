@@ -1,0 +1,83 @@
+---
+- name: Check VPN Server
+  hosts: vpn
+  tasks:
+    - name: Service Status
+      service:
+        name: openvpn@server
+        state: started
+
+    - name: Transfer script
+      copy: src=key.sh dest=/root/key.sh
+
+- name: Generate Key for Node
+  hosts: vpn-nodes
+  vars:
+    key_dir: /etc/openvpn
+  tasks:
+    - name: install repo
+      yum:
+        name: epel-release
+        state: latest
+
+    - name: openvpn package
+      yum:
+        name: openvpn
+        state: latest
+
+    - name: Check if keys exist
+      stat:
+        path: "/etc/openvpn/easy-rsa/keys/{{ item }}"
+      with_items:
+        - "{{ host_name }}.crt"
+        - "{{ host_name }}.key"
+      delegate_to: vpn-server
+      register: keys_exist
+
+    - name: Generate keys
+      shell: "sh /root/key.sh {{ host_name }}"
+      delegate_to: vpn-server
+      when:
+        - keys_exist.results[0].stat.exists == False
+        - keys_exist.results[1].stat.exists == False
+
+    - name: Temporary directory for keys
+      tempfile:
+        state: directory
+        suffix: keys
+      register: tmp_key_dir
+
+    - name: Directory for storing keys on the client
+      file:
+        path: "{{ key_dir }}"
+        state: directory
+
+    - name: Copy keys from server
+      fetch:
+        src: "/etc/openvpn/easy-rsa/keys/{{ item }}"
+        dest: "{{ tmp_key_dir['path'] }}/"
+        flat: yes
+      with_items:
+        - "ca.crt"
+        - "{{ host_name }}.crt"
+        - "{{ host_name }}.key"
+      delegate_to: vpn-server
+          
+    - name: Copy keys to client
+      copy:
+        src: "{{ tmp_key_dir['path'] }}/{{ item }}"
+        dest: "{{ key_dir }}/{{ item }}"
+      with_items:
+        - "ca.crt"
+        - "{{ host_name }}.crt"
+        - "{{ host_name }}.key"
+
+    - name: Create ovpn configuration
+      template:
+        src: client.conf.jn2
+        dest: "{{ key_dir }}/client.conf"
+
+    - name: Start Service
+      service:
+        name: openvpn@client
+        state: started

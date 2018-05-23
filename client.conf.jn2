@@ -1,0 +1,15 @@
+client
+dev tun
+proto udp
+
+#Server IP and Port
+remote 72.139.13.86 1194 udp
+
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+mute-replay-warnings
+ca ca.crt
+cert {{ host_name }}.crt
+key {{ host_name}}.key
