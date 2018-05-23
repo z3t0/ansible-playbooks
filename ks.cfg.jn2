@@ -5,6 +5,7 @@ auth --enableshadow --passalgo=sha512
 cdrom
 # Use graphical install
 graphical
+reboot
 # Run the Setup Agent on first boot
 firstboot --enable
 ignoredisk --only-use=sda
@@ -37,11 +38,12 @@ kexec-tools
 %end
 
 %addon com_redhat_kdump --enable --reserve-mb='auto'
+%end
 
-% post 
+%post 
 
 yum update -y 
 
-%end
+reboot
 
 %end

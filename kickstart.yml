@@ -3,17 +3,40 @@
   hosts: ks
   gather_facts: no
   connection: local
+  vars:
+    - tmp_dir:
+        root: "{{ playbook_dir}}/build/"
+        iso: "{{ playbook_dir}}/build/iso"
+        path: "{{ playbook_dir}}/build/{{ ansible_host }}"
   tasks:
-    - name: Create temporary directory
-      tempfile:
+    - name: create build directory
+      file:
+        path: "{{ tmp_dir['root'] }}"
         state: directory
-        suffix: build
-      register: tmp_dir
+
+    - name: create iso directory
+      file:
+        path: "{{ tmp_dir['iso'] }}"
+        state: directory
+
+    - name: create subdirectory
+      file:
+        path: "{{ tmp_dir['path'] }}"
+        state: directory
+    #- name: Create temporary directory
+      #tempfile:
+        #state: directory
+        #suffix: build
+      #register: tmp_dir
     - name: Create config
       template:
         src: ks.cfg.jn2
         dest: "{{ tmp_dir['path'] }}/ks.cfg"
+
+    - name: Validate config
+      shell: "ksvalidator {{ tmp_dir['path'] }}/ks.cfg"
+
     # Need to setup a place for files to be stored
     # or something like an email server
-    #- name: Create image
-      # shell: " mkisofs -o PATH {{ tmp_dir['path'] }}"
+    - name: Create image
+      shell: " mkisofs -o {{ tmp_dir['root'] }}/iso/{{ansible_host}}.iso {{ tmp_dir['path'] }}"
