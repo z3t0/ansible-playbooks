@@ -1,10 +1,19 @@
 ---
 - name: Create Kickstart Configuration
-  hosts: all
-  vars:
-    name: {{ host_name }}
-    ip: {{ host_ip }}
+  hosts: ks
+  gather_facts: no
+  connection: local
   tasks:
-    template:
-      src: ks.cfg
-      dest: "/tmp/ {{ name }}_ks.cfg"
+    - name: Create temporary directory
+      tempfile:
+        state: directory
+        suffix: build
+      register: tmp_dir
+    - name: Create config
+      template:
+        src: ks.cfg.jn2
+        dest: "{{ tmp_dir['path'] }}/ks.cfg"
+    # Need to setup a place for files to be stored
+    # or something like an email server
+    #- name: Create image
+      # shell: " mkisofs -o PATH {{ tmp_dir['path'] }}"
