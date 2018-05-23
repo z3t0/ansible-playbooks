@@ -18,7 +18,7 @@ lang en_US.UTF-8
 # TODO: Ansible assign ip
 network  --bootproto=static --device=ens160 --gateway=192.168.1.1 --ip={{ inventory_hostname}} --nameserver=64.71.255.204 --netmask=255.255.255.0 --ipv6=auto --activate
 # TODO: Ansible assign hostnmae
-network  --hostname={{ ansible_host }}
+network  --hostname={{ host_name }}
 
 # Root password
 rootpw --iscrypted $6$g5DxKHfoIjOePAcd$9v2TsW44o8zomKM0ZLe1NtRDlgoEM/e78NsK6MudD/aPIBxdVj74LKt.Iftsvs47YxcRTSnwX2ks3yTGwKBK6.

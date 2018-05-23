@@ -7,7 +7,7 @@
     - tmp_dir:
         root: "{{ playbook_dir}}/build/"
         iso: "{{ playbook_dir}}/build/iso"
-        path: "{{ playbook_dir}}/build/{{ ansible_host }}"
+        path: "{{ playbook_dir}}/build/{{ host_name }}"
   tasks:
     - name: create build directory
       file:
