@@ -1,0 +1,159 @@
+---
+- name: Setup PXE Server
+  hosts: pxe
+  gather_facts: no
+  vars:
+    - esxi_host_name: 192.168.1.31
+    - subnet: 192.168.1.0
+  tasks:
+    - name: Update
+      yum:
+        name: '*'
+        state: latest
+    - name: Install packages
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - dnsmasq
+        - tftp
+        - tftp-server
+        - syslinux
+        - vsftpd
+        - xinetd
+
+    - name: TFTP Configuration
+      copy:
+        src: tftp
+        dest: /etc/xinetd.d/
+
+    - name: DNSMASQ Configuration
+      template:
+        src: dnsmasq.jn2
+        dest: /etc/default/dnsmasq
+
+    - name: Network Boot Files
+      shell: "cp /usr/share/syslinux/{{ item }} /var/lib/tftpboot"
+      with_items:
+        - pxelinux.0
+        - menu.c32
+        - memdisk
+        - mboot.c32
+        - chain.c32
+
+    - name: Network Boot Directories
+      file:
+        path: "/var/lib/tftpboot/{{ item }}"
+        state: directory
+      with_items:
+        - pxelinux.cfg
+        - networkboot
+
+    - name: Centos Kernel Exists
+      stat:
+        path: "/var/lib/tftpboot/networkboot/{{ item }}"
+      with_items:
+        - vmlinuz
+        - initrd.img
+      register: centos_kernel_exists
+
+    # CANTFIX: The vsphere_guest and vmware_guest modules
+    #          contain bugs.
+    # ACTION: Wait for licensing issue to be resolveed
+    #         then debug the modules and support a patch
+    #- name: Mount CentOS ISO on VM
+    #  vsphere_guest:
+    #    vcenter_hostname: "{{ esxi_host_name }}"
+    #    username: "{{ lookup('env', 'VMWARE_USER') }}"
+    #    password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"
+    #    validate_certs: no
+    #    guest: "{{ host_name }}"
+    #    state: reconfigured
+    #    vm_hardware:
+    #        vm_cdrom:
+    #            type: iso
+    #            iso_path: esx3_int_datastore1/iso/centos/CentOS-7-x86_64-DVD.iso
+
+    #    force: yes
+    #  delegate_to: localhost
+    #  when:
+    #    - centos_kernel_exists.results[0].stat.exists == False
+    #    - centos_kernel_exists.results[1].stat.exists == False
+
+    - name: Mount Point
+      file:
+        path: /mnt/centos
+        state: directory
+      when:
+        - centos_kernel_exists.results[0].stat.exists == False
+        - centos_kernel_exists.results[1].stat.exists == False
+
+    - name: Mount Image to Filesystem
+      mount:
+        path: /mnt/centos
+        src: /dev/sr0
+        state: mounted
+        fstype: iso9660
+      when:
+        - centos_kernel_exists.results[0].stat.exists == False
+        - centos_kernel_exists.results[1].stat.exists == False
+
+    - name: Copy kernel and initrd
+      shell: "cp /mnt/centos/images/pxeboot/{{ item }} /var/lib/tftpboot/networkboot/"
+      with_items:
+        - vmlinuz
+        - initrd.img
+      when:
+        - centos_kernel_exists.results[0].stat.exists == False
+        - centos_kernel_exists.results[1].stat.exists == False
+
+    - name: Copy Image
+      shell: cp -av /mnt/centos/* /var/ftp/pub/
+      when:
+        - centos_kernel_exists.results[0].stat.exists == False
+        - centos_kernel_exists.results[1].stat.exists == False
+
+    - name: Unmount Image
+      mount:
+        path: /mnt/centos
+        src: /dev/sr0
+        state: unmounted
+      when:
+        - centos_kernel_exists.results[0].stat.exists == False
+        - centos_kernel_exists.results[1].stat.exists == False
+
+    - name: PXE Menu
+      template:
+        src: pxe-menu.cfg.jn2
+        dest: /var/lib/tftpboot/pxelinux.cfg/default
+
+    - name: Services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - xinetd
+        - vsftpd
+        - dnsmasq
+
+    - name: SELinux FTP Rule
+      shell: setsebool -P allow_ftpd_full_access 1
+
+    - name: Firewall Services
+      firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true
+      with_items:
+        - ftp
+
+    - name: Firewall Ports
+      firewalld:
+        port: "{{ item }}"
+        state: enabled
+        permanent: true
+      with_items:
+        - 69/tcp
+        - 69/udp
+        - 4011/udp
